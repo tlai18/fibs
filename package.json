@@ -1,27 +1,52 @@
 {
-  "name": "fibs",
+  "name": "guess-whos-the-liar",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "server": "tsx server/src/server.ts",
+    "server:dev": "tsx watch server/src/server.ts",
+    "start:server": "tsx server/src/server.ts",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx server/src/seed.ts",
+    "deploy": "npm run build && npm run db:generate",
+    "deploy:prod": "NODE_ENV=production npm run deploy",
+    "analyze": "ANALYZE=true npm run build",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next node_modules/.cache",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@prisma/client": "^6.17.1",
+    "@socket.io/redis-adapter": "^8.3.0",
+    "@types/express": "^5.0.3",
+    "@types/uuid": "^10.0.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "next": "15.5.5",
+    "prisma": "^6.17.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.5"
+    "redis": "^5.8.3",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "socket.io-redis": "^5.4.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20.19.21",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.5.5",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "tsx": "^4.20.6",
+    "typescript": "^5"
   }
 }

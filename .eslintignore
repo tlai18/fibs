@@ -1,0 +1,19 @@
+# Generated files
+src/generated/
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Prisma generated files
+prisma/generated/
+**/generated/
+
+# Environment files
+.env*
+config/environment.js
+
+# Build artifacts
+*.log
+*.tsbuildinfo

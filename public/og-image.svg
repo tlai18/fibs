@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#111827;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="100" cy="100" r="50" fill="#8b5cf6" opacity="0.1"/>
+  <circle cx="1100" cy="150" r="80" fill="#3b82f6" opacity="0.1"/>
+  <circle cx="150" cy="500" r="60" fill="#8b5cf6" opacity="0.1"/>
+  <circle cx="1000" cy="450" r="70" fill="#3b82f6" opacity="0.1"/>
+  
+  <!-- Main title -->
+  <text x="600" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#ffffff">
+    Guess Who's Lying
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" fill="#d1d5db">
+    Social Deduction Party Game
+  </text>
+  
+  <!-- Feature highlights -->
+  <text x="600" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#9ca3af">
+    🎮 Free Online Game • 👥 2-8 Players • 📱 No Download Required
+  </text>
+  
+  <!-- Call to action -->
+  <rect x="450" y="420" width="300" height="60" rx="30" fill="url(#accentGradient)"/>
+  <text x="600" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#ffffff">
+    Play Now - It's Free!
+  </text>
+  
+  <!-- Fox avatar (representative) -->
+  <g transform="translate(100, 300)">
+    <!-- Fox face background -->
+    <circle cx="40" cy="40" r="35" fill="#f97316"/>
+    
+    <!-- Fox ears -->
+    <circle cx="25" cy="20" r="12" fill="#ea580c"/>
+    <circle cx="55" cy="20" r="12" fill="#ea580c"/>
+    
+    <!-- Inner ears -->
+    <circle cx="25" cy="20" r="6" fill="#dc2626"/>
+    <circle cx="55" cy="20" r="6" fill="#dc2626"/>
+    
+    <!-- Fox eyes -->
+    <circle cx="32" cy="35" r="5" fill="#1f2937"/>
+    <circle cx="48" cy="35" r="5" fill="#1f2937"/>
+    
+    <!-- Eye shine -->
+    <circle cx="33" cy="35" r="2" fill="#ffffff"/>
+    <circle cx="49" cy="35" r="2" fill="#ffffff"/>
+    
+    <!-- Fox nose -->
+    <circle cx="40" cy="45" r="3" fill="#1f2937"/>
+    
+    <!-- Fox mouth -->
+    <ellipse cx="40" cy="52" rx="6" ry="3" fill="#1f2937"/>
+  </g>
+  
+  <!-- URL -->
+  <text x="600" y="580" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#6b7280">
+    guess-whos-lying.com
+  </text>
+</svg>
