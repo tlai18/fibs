@@ -15,7 +15,11 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "https://fibs-r0g58osqo-thomas-projects-3bd907c1.vercel.app",
+      "https://guess-whos-lying.vercel.app"
+    ],
     methods: ["GET", "POST"]
   }
 });
@@ -47,7 +51,15 @@ try {
 }
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "https://fibs-r0g58osqo-thomas-projects-3bd907c1.vercel.app",
+    "https://guess-whos-lying.vercel.app"
+  ],
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 app.use(express.json());
 
 // Health check
