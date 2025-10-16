@@ -43,7 +43,10 @@ export function calculateVotingResults(
   
   // Count votes
   votes.forEach(vote => {
-    if (voteCounts[vote.accusedPlayerId]) {
+    if (vote.isNoLiarVote) {
+      voteCounts['NO_LIAR'].count++;
+      voteCounts['NO_LIAR'].voters.push(vote.voterId);
+    } else if (vote.accusedPlayerId && voteCounts[vote.accusedPlayerId]) {
       voteCounts[vote.accusedPlayerId].count++;
       voteCounts[vote.accusedPlayerId].voters.push(vote.voterId);
     }

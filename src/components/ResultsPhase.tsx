@@ -218,9 +218,9 @@ export function ResultsPhase() {
                 const voter = gameState.players.find((p: any) => p.id === vote.voterId);
                 const voterName = voter ? voter.nickname : 'Unknown';
                 
-                // Check for "No Liar" votes - either explicit 'NO_LIAR' or self-votes (legacy)
-                const isNoLiarVote = vote.accusedPlayerId === 'NO_LIAR' || 
-                                   vote.accusedPlayerId === vote.voterId;
+                // Check for "No Liar" votes using the new field
+                const isNoLiarVote = vote.isNoLiarVote || 
+                                   vote.accusedPlayerId === vote.voterId; // Keep legacy support
                 
                 if (isNoLiarVote) {
                   if (!voteCounts['NO_LIAR']) {

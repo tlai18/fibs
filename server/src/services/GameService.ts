@@ -418,32 +418,15 @@ export class GameService {
 
     const round = party.rounds[0];
 
-    // For "No Liar" votes, we need to create a special player entry or use a placeholder
-    // Since accusedPlayerId must reference a valid Player, we'll use a special approach
-    let actualAccusedPlayerId = accusedPlayerId;
+    // For "No Liar" votes, we'll use a special approach without creating a database player
+    // We'll store the vote with isNoLiarVote = true and accusedPlayerId = null
+    let actualAccusedPlayerId: string | null = accusedPlayerId;
+    let isNoLiarVote = false;
     
     if (accusedPlayerId === 'NO_LIAR') {
-      // For "No Liar" votes, we'll use a special placeholder player
-      // We'll create a temporary player entry with ID 'NO_LIAR' if it doesn't exist
-      let noLiarPlayer = await this.prisma.player.findUnique({
-        where: { id: 'NO_LIAR' }
-      });
-      
-      if (!noLiarPlayer) {
-        // Create a special placeholder player for "No Liar" votes
-        noLiarPlayer = await this.prisma.player.create({
-          data: {
-            id: 'NO_LIAR',
-            partyId: party.id,
-            nickname: 'No Liar',
-            avatar: 'ghost',
-            isHost: false,
-            isActive: false // This player is just a placeholder
-          }
-        });
-      }
-      
-      actualAccusedPlayerId = 'NO_LIAR';
+      // For "No Liar" votes, we'll use the isNoLiarVote flag instead
+      actualAccusedPlayerId = null;
+      isNoLiarVote = true;
     }
 
     // Check if voter already voted - if so, update the existing vote instead of creating new one
@@ -467,7 +450,8 @@ export class GameService {
           }
         },
         data: {
-          accusedPlayerId: actualAccusedPlayerId
+          accusedPlayerId: actualAccusedPlayerId,
+          isNoLiarVote: isNoLiarVote
         }
       });
     } else {
@@ -476,7 +460,8 @@ export class GameService {
         data: {
           roundId: round.id,
           voterId: voter.id,
-          accusedPlayerId: actualAccusedPlayerId
+          accusedPlayerId: actualAccusedPlayerId,
+          isNoLiarVote: isNoLiarVote
         }
       });
     }
@@ -603,10 +588,10 @@ export class GameService {
     let noLiarVotes = 0;
     
     votes.forEach(vote => {
-      // Check if this is a "No Liar" vote
-      if (vote.accusedPlayerId === 'NO_LIAR') {
+      // Check if this is a "No Liar" vote using the new field
+      if (vote.isNoLiarVote) {
         noLiarVotes++;
-      } else {
+      } else if (vote.accusedPlayerId) {
         voteCounts[vote.accusedPlayerId] = (voteCounts[vote.accusedPlayerId] || 0) + 1;
       }
     });
@@ -704,7 +689,7 @@ export class GameService {
         winType = 'group_win';
         // Give +1 points to all players who voted "No Liar"
         votes.forEach(vote => {
-          if (vote.accusedPlayerId === 'NO_LIAR') {
+          if (vote.isNoLiarVote) {
             scoresDelta[vote.voterId] = 1;
           }
         });

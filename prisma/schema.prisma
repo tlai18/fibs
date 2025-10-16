@@ -131,15 +131,16 @@ model Response {
 }
 
 model Vote {
-  id              String @id @default(cuid())
+  id              String  @id @default(cuid())
   roundId         String
   voterId         String
-  accusedPlayerId String
+  accusedPlayerId String?
+  isNoLiarVote    Boolean @default(false)
   createdAt       DateTime @default(now())
 
   round   Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
   voter   Player @relation("VoterVote", fields: [voterId], references: [id], onDelete: Cascade)
-  accused Player @relation("AccusedVote", fields: [accusedPlayerId], references: [id], onDelete: Cascade)
+  accused Player? @relation("AccusedVote", fields: [accusedPlayerId], references: [id], onDelete: Cascade)
 
   @@unique([roundId, voterId])
   @@map("votes")
