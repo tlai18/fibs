@@ -68,10 +68,8 @@ model Round {
 
 model Prompt {
   id           Int           @id @default(autoincrement())
-  category     String
   textTrue     String
   textDecoy    String
-  difficulty   Int           @default(1)
   enabled      Boolean       @default(true)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt

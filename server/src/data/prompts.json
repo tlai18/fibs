@@ -1,0 +1,182 @@
+[
+  {
+    "textTrue": "Name a Pixar movie.",
+    "textDecoy": "Name an animated movie."
+  },
+  {
+    "textTrue": "Name a Marvel movie.",
+    "textDecoy": "Name a superhero movie."
+  },
+  {
+    "textTrue": "Name a James Bond movie.",
+    "textDecoy": "Name a spy movie."
+  },
+  {
+    "textTrue": "Name a movie with Tom Hanks.",
+    "textDecoy": "Name a movie with Tom Cruise."
+  },
+  {
+    "textTrue": "Name a Quentin Tarantino movie.",
+    "textDecoy": "Name a violent movie."
+  },
+  {
+    "textTrue": "Name a type of pasta.",
+    "textDecoy": "Name an Italian food."
+  },
+  {
+    "textTrue": "Name a citrus fruit.",
+    "textDecoy": "Name a sour fruit."
+  },
+  {
+    "textTrue": "Name a type of cheese.",
+    "textDecoy": "Name a dairy product."
+  },
+  {
+    "textTrue": "Name a root vegetable.",
+    "textDecoy": "Name a vegetable."
+  },
+  {
+    "textTrue": "Name a type of mushroom.",
+    "textDecoy": "Name a fungus."
+  },
+  {
+    "textTrue": "Name a city in California.",
+    "textDecoy": "Name a city in the US."
+  },
+  {
+    "textTrue": "Name a European capital.",
+    "textDecoy": "Name a capital city."
+  },
+  {
+    "textTrue": "Name a city in Japan.",
+    "textDecoy": "Name a city in Asia."
+  },
+  {
+    "textTrue": "Name a city in Australia.",
+    "textDecoy": "Name a city in Oceania."
+  },
+  {
+    "textTrue": "Name a city with over 10 million people.",
+    "textDecoy": "Name a large city."
+  },
+  {
+    "textTrue": "Name a type of bear.",
+    "textDecoy": "Name a large mammal."
+  },
+  {
+    "textTrue": "Name a bird of prey.",
+    "textDecoy": "Name a bird."
+  },
+  {
+    "textTrue": "Name a marine mammal.",
+    "textDecoy": "Name an ocean animal."
+  },
+  {
+    "textTrue": "Name a marsupial.",
+    "textDecoy": "Name an Australian animal."
+  },
+  {
+    "textTrue": "Name a venomous snake.",
+    "textDecoy": "Name a dangerous animal."
+  },
+  {
+    "textTrue": "Name a sport played with a ball.",
+    "textDecoy": "Name a team sport."
+  },
+  {
+    "textTrue": "Name an Olympic sport.",
+    "textDecoy": "Name a competitive sport."
+  },
+  {
+    "textTrue": "Name a winter sport.",
+    "textDecoy": "Name a cold weather sport."
+  },
+  {
+    "textTrue": "Name a combat sport.",
+    "textDecoy": "Name a fighting sport."
+  },
+  {
+    "textTrue": "Name a sport with a net.",
+    "textDecoy": "Name a court sport."
+  },
+  {
+    "textTrue": "Name a programming language.",
+    "textDecoy": "Name a computer language."
+  },
+  {
+    "textTrue": "Name a social media platform.",
+    "textDecoy": "Name a website."
+  },
+  {
+    "textTrue": "Name a video game console.",
+    "textDecoy": "Name a gaming device."
+  },
+  {
+    "textTrue": "Name a smartphone brand.",
+    "textDecoy": "Name a tech company."
+  },
+  {
+    "textTrue": "Name a cloud computing service.",
+    "textDecoy": "Name an internet service."
+  },
+  {
+    "textTrue": "Name a Beatles song.",
+    "textDecoy": "Name a classic rock song."
+  },
+  {
+    "textTrue": "Name a musical instrument.",
+    "textDecoy": "Name something that makes music."
+  },
+  {
+    "textTrue": "Name a music genre.",
+    "textDecoy": "Name a type of music."
+  },
+  {
+    "textTrue": "Name a Grammy-winning artist.",
+    "textDecoy": "Name a famous musician."
+  },
+  {
+    "textTrue": "Name a classical composer.",
+    "textDecoy": "Name a famous composer."
+  },
+  {
+    "textTrue": "Name a type of tree.",
+    "textDecoy": "Name a plant."
+  },
+  {
+    "textTrue": "Name a natural disaster.",
+    "textDecoy": "Name something dangerous."
+  },
+  {
+    "textTrue": "Name a type of rock.",
+    "textDecoy": "Name something found underground."
+  },
+  {
+    "textTrue": "Name a constellation.",
+    "textDecoy": "Name something in the sky."
+  },
+  {
+    "textTrue": "Name a chemical element.",
+    "textDecoy": "Name something scientific."
+  },
+  {
+    "textTrue": "Name a TV show on Netflix.",
+    "textDecoy": "Name a streaming show."
+  },
+  {
+    "textTrue": "Name a Broadway musical.",
+    "textDecoy": "Name a musical."
+  },
+  {
+    "textTrue": "Name a podcast.",
+    "textDecoy": "Name an audio show."
+  },
+  {
+    "textTrue": "Name a YouTube channel.",
+    "textDecoy": "Name an online channel."
+  },
+  {
+    "textTrue": "Name a comedy special.",
+    "textDecoy": "Name a comedy show."
+  }
+]
