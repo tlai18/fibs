@@ -30,7 +30,7 @@ export function calculateMajorityThreshold(totalPlayers: number): number {
  * Calculate voting results for a round
  */
 export function calculateVotingResults(
-  votes: Array<{ voterId: string; accusedPlayerId: string }>,
+  votes: Array<{ voterId: string; accusedPlayerId: string | null; isNoLiarVote: boolean }>,
   players: Array<{ id: string; nickname: string }>
 ): VotingResult[] {
   const voteCounts: Record<string, { count: number; voters: string[] }> = {};
@@ -66,7 +66,7 @@ export function calculateVotingResults(
  * Calculate round results and scoring
  */
 export function calculateRoundResults(
-  votes: Array<{ voterId: string; accusedPlayerId: string }>,
+  votes: Array<{ voterId: string; accusedPlayerId: string | null; isNoLiarVote: boolean }>,
   players: Array<{ id: string; nickname: string }>,
   liarPlayerId: string | null,
   isNoLiarRound: boolean = false

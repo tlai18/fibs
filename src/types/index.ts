@@ -47,7 +47,8 @@ export interface Response {
 export interface Vote {
   id: string;
   voterId: string;
-  accusedPlayerId: string;
+  accusedPlayerId: string | null;
+  isNoLiarVote: boolean;
   createdAt: string;
 }
 
