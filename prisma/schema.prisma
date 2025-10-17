@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -22,69 +16,65 @@ model Party {
   usedPromptIds Int[]    @default([])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-
-  players Player[]
-  rounds  Round[]
+  players       Player[]
+  rounds        Round[]
 
   @@map("parties")
 }
 
 model Player {
-  id        String   @id @default(cuid())
-  partyId   String
-  nickname  String
-  avatar    String
-  socketId  String?
-  isHost    Boolean  @default(false)
-  isActive  Boolean  @default(true)
-  score     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  party       Party       @relation(fields: [partyId], references: [id], onDelete: Cascade)
-  assignments Assignment[]
-  responses   Response[]
-  votesCast   Vote[]      @relation("VoterVote")
-  votesAgainst Vote[]     @relation("AccusedVote")
-  roundsAsLiar Round[]    @relation("LiarRound")
+  id           String       @id @default(cuid())
+  partyId      String
+  nickname     String
+  avatar       String
+  socketId     String?
+  isHost       Boolean      @default(false)
+  isActive     Boolean      @default(true)
+  score        Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  assignments  Assignment[]
+  party        Party        @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  responses    Response[]
+  roundsAsLiar Round[]      @relation("LiarRound")
+  votesAgainst Vote[]       @relation("AccusedVote")
+  votesCast    Vote[]       @relation("VoterVote")
 
   @@map("players")
 }
 
 model Round {
-  id            String    @id @default(cuid())
-  partyId       String
-  number        Int
-  liarPlayerId  String?   // Made nullable for No Liar rounds
-  status        String    @default("lobby")
-  stealth       Boolean   @default(false)
-  startedAt     DateTime  @default(now())
-  endedAt       DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  party        Party           @relation(fields: [partyId], references: [id], onDelete: Cascade)
-  liar         Player?         @relation("LiarRound", fields: [liarPlayerId], references: [id])
+  id           String        @id @default(cuid())
+  partyId      String
+  number       Int
+  liarPlayerId String?
+  status       String        @default("lobby")
+  stealth      Boolean       @default(false)
+  startedAt    DateTime      @default(now())
+  endedAt      DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   assignments  Assignment[]
   responses    Response[]
-  votes        Vote[]
   prompt       RoundPrompt?
   summary      RoundSummary?
+  liar         Player?       @relation("LiarRound", fields: [liarPlayerId], references: [id])
+  party        Party         @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  votes        Vote[]
 
   @@unique([partyId, number])
   @@map("rounds")
 }
 
 model Prompt {
-  id         Int     @id @default(autoincrement())
-  category   String
-  textTrue   String
-  textDecoy  String
-  difficulty Int     @default(1)
-  enabled    Boolean @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
+  id           Int           @id @default(autoincrement())
+  category     String
+  textTrue     String
+  textDecoy    String
+  difficulty   Int           @default(1)
+  enabled      Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   roundPrompts RoundPrompt[]
 
   @@map("prompts")
@@ -94,66 +84,61 @@ model RoundPrompt {
   id       String @id @default(cuid())
   roundId  String @unique
   promptId Int
-
-  round  Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  prompt Prompt @relation(fields: [promptId], references: [id])
+  prompt   Prompt @relation(fields: [promptId], references: [id])
+  round    Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
 
   @@map("round_prompts")
 }
 
 model Assignment {
-  id             String @id @default(cuid())
-  roundId        String
-  playerId       String
-  role           String // 'liar' | 'truth'
-  promptVariant  String // 'true' | 'decoy'
-  createdAt      DateTime @default(now())
-
-  round  Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  roundId       String
+  playerId      String
+  role          String
+  promptVariant String
+  createdAt     DateTime @default(now())
+  player        Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  round         Round    @relation(fields: [roundId], references: [id], onDelete: Cascade)
 
   @@unique([roundId, playerId])
   @@map("assignments")
 }
 
 model Response {
-  id       String @id @default(cuid())
-  roundId  String
-  playerId String
-  text     String
+  id        String   @id @default(cuid())
+  roundId   String
+  playerId  String
+  text      String
   createdAt DateTime @default(now())
-
-  round  Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  round     Round    @relation(fields: [roundId], references: [id], onDelete: Cascade)
 
   @@unique([roundId, playerId])
   @@map("responses")
 }
 
 model Vote {
-  id              String  @id @default(cuid())
+  id              String   @id @default(cuid())
   roundId         String
   voterId         String
   accusedPlayerId String?
-  isNoLiarVote    Boolean @default(false)
   createdAt       DateTime @default(now())
-
-  round   Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  voter   Player @relation("VoterVote", fields: [voterId], references: [id], onDelete: Cascade)
-  accused Player? @relation("AccusedVote", fields: [accusedPlayerId], references: [id], onDelete: Cascade)
+  isNoLiarVote    Boolean  @default(false)
+  accused         Player?  @relation("AccusedVote", fields: [accusedPlayerId], references: [id], onDelete: Cascade)
+  round           Round    @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  voter           Player   @relation("VoterVote", fields: [voterId], references: [id], onDelete: Cascade)
 
   @@unique([roundId, voterId])
   @@map("votes")
 }
 
 model RoundSummary {
-  id           String @id @default(cuid())
-  roundId      String @unique
-  liarCaught   Boolean
-  winType      String
-  scoresDelta  Json?
-
-  round Round @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  id          String  @id @default(cuid())
+  roundId     String  @unique
+  liarCaught  Boolean
+  winType     String
+  scoresDelta Json?
+  round       Round   @relation(fields: [roundId], references: [id], onDelete: Cascade)
 
   @@map("round_summaries")
 }
