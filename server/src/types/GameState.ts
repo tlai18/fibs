@@ -91,10 +91,8 @@ export interface RoundSummary {
 
 export interface Prompt {
   id: string;
-  category: string;
   textTrue: string;
   textDecoy: string;
-  difficulty: number;
   enabled: boolean;
 }
 
