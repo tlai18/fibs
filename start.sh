@@ -22,10 +22,6 @@ fi
 echo "🗄️ Setting up database tables..."
 npm run db:push
 
-# Seed initial data
-echo "🌱 Seeding database with initial prompts..."
-npm run db:seed
-
 # Start backend server in background
 echo "🔧 Starting backend server (port 3002)..."
 npm run server:dev &

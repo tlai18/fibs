@@ -159,126 +159,113 @@ export class GameService {
     };
   }
 
-  async startNewRound(partyCode: string, hostSocketId: string) {
+  async startNewRound(partyCode: string, hostSocketId: string, gameMode: 'classic' | 'custom' = 'classic') {
     try {
       console.log(`startNewRound called: partyCode=${partyCode}, hostSocketId=${hostSocketId}`);
       
       const party = await this.prisma.party.findUnique({
-      where: { code: partyCode },
-      include: { players: { where: { isActive: true } } }
-    });
+        where: { code: partyCode },
+        include: { players: { where: { isActive: true } } }
+      });
 
-    if (!party) {
-      throw new Error('Party not found');
-    }
+      if (!party) {
+        throw new Error('Party not found');
+      }
 
-    const hostPlayer = party.players.find(p => p.socketId === hostSocketId);
-    if (!hostPlayer || !hostPlayer.isHost) {
-      throw new Error('Only host can start the game');
-    }
+      const hostPlayer = party.players.find(p => p.socketId === hostSocketId);
+      if (!hostPlayer || !hostPlayer.isHost) {
+        throw new Error('Only host can start the game');
+      }
 
-    if (party.players.length < 2) {
-      throw new Error('Need at least 2 players to start');
-    }
+      if (party.players.length < 2) {
+        throw new Error('Need at least 2 players to start');
+      }
 
-    console.log(`Party validation passed: ${party.players.length} players`);
+      console.log(`Party validation passed: ${party.players.length} players`);
 
-    // Get next round number
-    const lastRound = await this.prisma.round.findFirst({
-      where: { partyId: party.id },
-      orderBy: { number: 'desc' }
-    });
-    const roundNumber = (lastRound?.number || 0) + 1;
+      // Update party with game mode
+      await this.prisma.party.update({
+        where: { id: party.id },
+        data: { 
+          gameMode,
+          status: 'playing'
+        }
+      });
 
-    console.log(`Creating round ${roundNumber}`);
+      // Get next round number
+      const lastRound = await this.prisma.round.findFirst({
+        where: { partyId: party.id },
+        orderBy: { number: 'desc' }
+      });
+      const roundNumber = (lastRound?.number || 0) + 1;
 
-    // Select prompt and assign roles
-    const prompt = await this.promptService.selectPrompt(party.usedPromptIds);
-    const roleAssignments = this.assignRoles(party.players);
-    
-    console.log(`Selected prompt ${prompt.id}, assigned ${roleAssignments.assignments.length} roles`);
+      console.log(`Creating round ${roundNumber} in ${gameMode} mode`);
 
-    // Create round first (simplified approach)
-    console.log('Creating round...');
-    const round = await this.prisma.round.create({
-      data: {
-        partyId: party.id,
-        number: roundNumber,
-        liarPlayerId: roleAssignments.liar?.id || null, // Handle No Liar rounds
-        stealth: false, // Always false - stealth rounds removed
-        status: 'answer', // Start directly in answer phase
-      },
-    });
+      if (gameMode === 'classic') {
+        // Classic mode: Use database prompts
+        const prompt = await this.promptService.selectPrompt(party.usedPromptIds);
+        const roleAssignments = this.assignRoles(party.players);
+        
+        console.log(`Selected prompt ${prompt.id}, assigned ${roleAssignments.assignments.length} roles`);
 
-    console.log('Creating round-prompt relationship...');
-    await this.prisma.roundPrompt.create({
-      data: {
-        roundId: round.id,
-        promptId: prompt.id,
-      },
-    });
+        // Create round with database prompt
+        const round = await this.prisma.round.create({
+          data: {
+            partyId: party.id,
+            number: roundNumber,
+            liarPlayerId: roleAssignments.liar?.id || null,
+            stealth: false,
+            isCustomPrompt: false,
+            status: 'answer', // Start directly in answer phase
+          },
+        });
 
-    console.log('Creating assignments...');
-    const assignments = await Promise.all(
-      roleAssignments.assignments.map((assignment: any) =>
-        this.prisma.assignment.create({
+        // Create round-prompt relationship
+        await this.prisma.roundPrompt.create({
           data: {
             roundId: round.id,
-            playerId: assignment.playerId,
-            role: assignment.role,
-            promptVariant: assignment.promptVariant
-          }
-        })
-      )
-    );
+            promptId: prompt.id,
+          },
+        });
 
-    console.log('Updating party status...');
-    await this.prisma.party.update({
-      where: { id: party.id },
-      data: {
-        usedPromptIds: [...party.usedPromptIds, prompt.id],
-        status: 'playing'
+        return this.createRoundResult(round, party, roleAssignments.assignments);
+      } else {
+        // Custom mode: Start with prompt creation phase
+        const promptCreator = this.getPromptCreator(roundNumber, party.players);
+        const roleAssignments = this.assignRoles(party.players, promptCreator.id);
+        
+        console.log(`Custom mode: ${promptCreator.nickname} will create the prompt`);
+
+        // Create round in prompt-creation phase
+        const round = await this.prisma.round.create({
+          data: {
+            partyId: party.id,
+            number: roundNumber,
+            liarPlayerId: roleAssignments.liar?.id || null,
+            promptCreatorId: promptCreator.id,
+            stealth: false,
+            isCustomPrompt: true,
+            status: 'prompt-creation', // Start in prompt creation phase
+          },
+        });
+
+        // Create assignments without prompt yet
+        await this.createAssignments(round.id, roleAssignments.assignments);
+
+        return {
+          round,
+          party: await this.getPartyState(partyCode),
+          assignments: roleAssignments.assignments,
+          promptCreator
+        };
       }
-    });
-
-    console.log('Getting complete round...');
-    const completeRound = await this.prisma.round.findUnique({
-      where: { id: round.id },
-      include: {
-        assignments: {
-          include: { player: true }
-        },
-        prompt: {
-          include: { prompt: true }
-        }
-      }
-    });
-
-    // Get updated party with rounds for phase determination
-    const updatedParty = await this.prisma.party.findUnique({
-      where: { id: party.id },
-      include: { 
-        players: true,
-        rounds: {
-          orderBy: { number: 'desc' },
-          take: 1
-        }
-      }
-    });
-
-    console.log('startNewRound completed successfully');
-    return {
-      round: completeRound,
-      party: updatedParty!,
-      assignments: completeRound!.assignments
-    };
     } catch (error) {
       console.error('Error in startNewRound:', error);
       throw error;
     }
   }
 
-  private assignRoles(players: any[]) {
+  private assignRoles(players: any[], excludePlayerId?: string) {
     // 10% chance of No Liar round (everyone gets truth prompt)
     const isNoLiarRound = Math.random() < 0.1;
 
@@ -298,9 +285,30 @@ export class GameService {
     }
 
     // Regular round with one liar
-    const shuffled = [...players].sort(() => Math.random() - 0.5);
+    // Exclude the prompt creator from being selected as liar
+    const eligiblePlayers = excludePlayerId 
+      ? players.filter(p => p.id !== excludePlayerId)
+      : players;
+    
+    if (eligiblePlayers.length === 0) {
+      // If only prompt creator is playing, make it a no-liar round
+      console.log('🎯 Only prompt creator playing, making it a no-liar round.');
+      return {
+        liar: null,
+        truths: players,
+        stealth: false,
+        isNoLiarRound: true,
+        assignments: players.map(player => ({
+          playerId: player.id,
+          role: 'truth' as const,
+          promptVariant: 'true' as const
+        }))
+      };
+    }
+    
+    const shuffled = [...eligiblePlayers].sort(() => Math.random() - 0.5);
     const liar = shuffled[0];
-    const truths = shuffled.slice(1);
+    const truths = players.filter(p => p.id !== liar.id);
 
     return {
       liar,
@@ -417,6 +425,11 @@ export class GameService {
     }
 
     const round = party.rounds[0];
+
+    // Check if the voter is the prompt creator (cannot vote in custom mode)
+    if (round.promptCreatorId && round.promptCreatorId === voter.id) {
+      throw new Error('Prompt creator cannot vote in their own round');
+    }
 
     // For "No Liar" votes, we'll use a special approach without creating a database player
     // We'll store the vote with isNoLiarVote = true and accusedPlayerId = null
@@ -1177,6 +1190,88 @@ export class GameService {
           take: 1
         }
       }
+    });
+  }
+
+  // Helper method to determine prompt creator for custom mode
+  private getPromptCreator(roundNumber: number, players: any[]): any {
+    // Round 1: Host creates prompt
+    // Round 2+: Rotate through players in join order
+    const hostIndex = players.findIndex(p => p.isHost);
+    const creatorIndex = (hostIndex + roundNumber - 1) % players.length;
+    return players[creatorIndex];
+  }
+
+  // Helper method to create assignments
+  private async createAssignments(roundId: string, assignments: any[]): Promise<any[]> {
+    return Promise.all(
+      assignments.map((assignment: any) =>
+        this.prisma.assignment.create({
+          data: {
+            roundId,
+            playerId: assignment.playerId,
+            role: assignment.role,
+            promptVariant: assignment.promptVariant,
+          },
+        })
+      )
+    );
+  }
+
+  // Helper method to create round result for classic mode
+  private async createRoundResult(round: any, party: any, assignments: any[]): Promise<any> {
+    const createdAssignments = await this.createAssignments(round.id, assignments);
+    
+    return {
+      round,
+      party: await this.getPartyState(party.code),
+      assignments: createdAssignments
+    };
+  }
+
+  // Handle custom prompt creation
+  async createCustomPrompt(partyCode: string, playerId: string, textTrue: string, textDecoy: string) {
+    const party = await this.prisma.party.findUnique({
+      where: { code: partyCode },
+      include: { 
+        players: { where: { isActive: true } },
+        rounds: { 
+          where: { status: 'prompt-creation' },
+          orderBy: { number: 'desc' },
+          take: 1
+        }
+      }
+    });
+
+    if (!party) {
+      throw new Error('Party not found');
+    }
+
+    const currentRound = party.rounds[0];
+    if (!currentRound || currentRound.promptCreatorId !== playerId) {
+      throw new Error('You are not the prompt creator for this round');
+    }
+
+    // Update the round with the custom prompt
+    const updatedRound = await this.prisma.round.update({
+      where: { id: currentRound.id },
+      data: {
+        customPromptTextTrue: textTrue,
+        customPromptTextDecoy: textDecoy,
+        status: 'answer' // Move to answer phase
+      }
+    });
+
+    return {
+      round: updatedRound,
+      party: await this.getPartyState(partyCode)
+    };
+  }
+
+  // Helper method to get player by socket ID
+  async getPlayerBySocketId(socketId: string) {
+    return await this.prisma.player.findFirst({
+      where: { socketId, isActive: true }
     });
   }
 }

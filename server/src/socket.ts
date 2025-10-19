@@ -38,12 +38,23 @@ export function setupSocketHandlers(io: Server) {
     });
 
     // Game controls (host only)
-    socket.on('game:start', async (data: { partyCode: string }) => {
+    socket.on('game:start', async (data: { partyCode: string; gameMode: 'classic' | 'custom' }) => {
       try {
-        console.log('Starting game for party:', data.partyCode, 'socket:', socket.id);
-        const result = await gameService.startNewRound(data.partyCode, socket.id);
+        console.log('Starting game for party:', data.partyCode, 'mode:', data.gameMode, 'socket:', socket.id);
+        const result = await gameService.startNewRound(data.partyCode, socket.id, data.gameMode);
         console.log('Game started successfully for party:', data.partyCode);
-        io.to(data.partyCode).emit('round:new', result);
+        
+        if (data.gameMode === 'custom' && result.promptCreator) {
+          // Custom mode: Emit prompt creation phase
+          io.to(data.partyCode).emit('prompt:creation-phase', {
+            round: result.round,
+            party: result.party,
+            promptCreator: result.promptCreator
+          });
+        } else {
+          // Classic mode: Emit round new
+          io.to(data.partyCode).emit('round:new', result);
+        }
         io.to(data.partyCode).emit('party:state', result.party);
       } catch (error) {
         console.error('Error starting game:', error);
@@ -76,6 +87,29 @@ export function setupSocketHandlers(io: Server) {
       } catch (error) {
         console.error('Error in game:return-to-lobby handler:', error);
         socket.emit('error', { message: 'Failed to return to lobby: ' + (error as Error).message });
+      }
+    });
+
+    // Custom prompt creation
+    socket.on('prompt:create', async (data: { partyCode: string; textTrue: string; textDecoy: string }) => {
+      try {
+        console.log('Creating custom prompt for party:', data.partyCode, 'socket:', socket.id);
+        
+        // Find the player by socket ID
+        const player = await gameService.getPlayerBySocketId(socket.id);
+        if (!player) {
+          throw new Error('Player not found');
+        }
+        
+        const result = await gameService.createCustomPrompt(data.partyCode, player.id, data.textTrue, data.textDecoy);
+        
+        // Emit prompt created and move to answer phase
+        io.to(data.partyCode).emit('prompt:created', { success: true, round: result.round });
+        io.to(data.partyCode).emit('round:new', result);
+        io.to(data.partyCode).emit('party:state', result.party);
+      } catch (error) {
+        console.error('Error creating custom prompt:', error);
+        socket.emit('error', { message: 'Failed to create prompt: ' + (error as Error).message });
       }
     });
 
