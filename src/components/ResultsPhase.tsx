@@ -49,7 +49,7 @@ export function ResultsPhase() {
   }, [socket]);
 
   const handleNextRound = () => {
-    socket.emit('game:start', { partyCode: gameState.code });
+    socket.emit('game:start', { partyCode: gameState.code, gameMode: gameState.gameMode });
   };
 
   const currentRound = gameState.rounds?.[0];

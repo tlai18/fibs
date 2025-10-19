@@ -9,6 +9,7 @@ export interface Party {
   code: string;
   hostId: string;
   status: 'lobby' | 'playing' | 'finished';
+  gameMode: 'classic' | 'custom';
   settings: Record<string, any>;
   usedPromptIds: number[];
   createdAt: Date;
@@ -33,6 +34,10 @@ export interface Round {
   partyId: string;
   number: number;
   liarPlayerId: string | null; // Made nullable for No Liar rounds
+  promptCreatorId?: string | null; // Who created the custom prompt (custom mode only)
+  customPromptTextTrue?: string | null; // Custom prompt text (custom mode only)
+  customPromptTextDecoy?: string | null; // Custom decoy text (custom mode only)
+  isCustomPrompt: boolean; // true if custom, false if from database
   stealth: boolean;
   status: GamePhase;
   startedAt: Date;
@@ -96,7 +101,7 @@ export interface Prompt {
   enabled: boolean;
 }
 
-export type GamePhase = 'lobby' | 'answer' | 'reveal' | 'results';
+export type GamePhase = 'lobby' | 'prompt-creation' | 'answer' | 'reveal' | 'results';
 
 export interface SocketEvents {
   // Party events
@@ -114,10 +119,15 @@ export interface SocketEvents {
   'player:kick-success': { success: boolean; message: string };
 
   // Game events
-  'game:start': { partyCode: string };
+  'game:start': { partyCode: string; gameMode: 'classic' | 'custom' };
   'game:next-phase': { partyCode: string; phase: GamePhase };
   'round:new': { round: Round; party: Party; assignments: Assignment[] };
   'phase:changed': { round: Round; party: Party };
+
+  // Custom mode events
+  'prompt:create': { partyCode: string; textTrue: string; textDecoy: string };
+  'prompt:created': { success: boolean; round: Round };
+  'prompt:creation-phase': { round: Round; party: Party; promptCreator: Player };
 
   // Player actions
   'prompt:get-true': { roundId: string };

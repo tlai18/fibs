@@ -65,6 +65,7 @@ export function HowToPlay({ className = '' }: HowToPlayProps) {
                   <h5 className="font-semibold text-white">Discussion & Vote</h5>
                 </div>
                 <p className="text-green-200 text-sm">Read all answers, <span className="text-green-300 font-medium">discuss with your group</span>, then vote for who you think is lying, or choose <span className="text-green-300 font-medium">"No Liar"</span> if everyone seems honest.</p>
+                <p className="text-green-200 text-xs mt-2"><span className="text-yellow-300 font-medium">💡 Tip:</span> There's a <span className="text-yellow-300 font-bold">10% chance</span> that there's actually no liar in the round!</p>
               </div>
 
               {/* Step 4 */}
@@ -74,6 +75,63 @@ export function HowToPlay({ className = '' }: HowToPlayProps) {
                   <h5 className="font-semibold text-white">Results</h5>
                 </div>
                 <p className="text-orange-200 text-sm">Points are awarded based on who got caught and how well the Liar performed.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Game Modes */}
+          <div className="border-t border-indigo-400/30 pt-6 mb-8">
+            <div className="text-center mb-4">
+              <h4 className="text-lg font-semibold text-indigo-300 mb-2">Game Modes</h4>
+              <p className="text-indigo-200 text-sm">Choose your preferred style of play</p>
+            </div>
+            
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* Classic Mode */}
+              <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-4 border border-blue-400/30">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                  <h5 className="font-semibold text-white">Classic Mode</h5>
+                </div>
+                <ul className="text-blue-200 text-sm space-y-1">
+                  <li>• Random prompts from the database</li>
+                  <li>• Everyone participates in every round</li>
+                  <li>• Traditional social deduction gameplay</li>
+                  <li>• Perfect for new players</li>
+                </ul>
+              </div>
+
+              {/* Custom Mode */}
+              <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-4 border border-purple-400/30">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </div>
+                  <h5 className="font-semibold text-white">Custom Mode</h5>
+                </div>
+                <ul className="text-purple-200 text-sm space-y-1">
+                  <li>• Players take turns creating prompts</li>
+                  <li>• Prompt creator sits out that round</li>
+                  <li>• More creative and personal gameplay</li>
+                  <li>• Great for experienced players</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Custom Mode Details */}
+            <div className="mt-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg p-4 border border-purple-400/20">
+              <h6 className="font-semibold text-purple-300 text-sm mb-2">Custom Mode Rules:</h6>
+              <div className="text-purple-200 text-xs space-y-1">
+                <p>• <strong>Turn-based:</strong> Players create prompts in order (Round 1: Player 1, Round 2: Player 2, etc.)</p>
+                <p>• <strong>Creator Immunity:</strong> The prompt creator cannot vote or be voted as the liar</p>
+                <p>• <strong>Two Prompts:</strong> Create one true prompt and one decoy prompt for the liar</p>
+                <p>• <strong>Full Participation:</strong> Everyone else plays normally in that round</p>
               </div>
             </div>
           </div>

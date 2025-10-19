@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
 import { GameProvider } from '@/components/GameProvider';
 import { Lobby } from '@/components/Lobby';
+import { PromptCreationPhase } from '@/components/PromptCreationPhase';
 import { AnswerPhase } from '@/components/AnswerPhase';
 import { RevealPhase } from '@/components/RevealPhase';
 import { ResultsPhase } from '@/components/ResultsPhase';
@@ -447,6 +448,7 @@ function GamePageContent() {
     <GameProvider socket={socket} gameState={gameState} player={player}>
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900" suppressHydrationWarning={true}>
         {currentPhase === 'lobby' && <Lobby />}
+        {currentPhase === 'prompt-creation' && <PromptCreationPhase />}
         {currentPhase === 'answer' && <AnswerPhase />}
         {currentPhase === 'reveal' && <RevealPhase />}
         {currentPhase === 'results' && <ResultsPhase />}

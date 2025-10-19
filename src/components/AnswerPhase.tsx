@@ -86,7 +86,14 @@ export function AnswerPhase() {
 
   const currentRound = gameState.rounds?.[0];
   const submittedCount = currentRound?.responses?.length || 0;
-  const totalPlayers = gameState.players.filter((p: any) => p.id !== 'NO_LIAR').length;
+  
+  // Check if current player is the prompt creator (can't participate in their own round)
+  const isPromptCreator = currentRound?.promptCreatorId === player.id;
+  
+  // In custom mode, exclude the prompt creator from the total player count
+  const totalPlayers = gameState.players.filter((p: any) => 
+    p.id !== 'NO_LIAR' && p.id !== currentRound?.promptCreatorId
+  ).length;
 
   return (
     <div className="min-h-screen p-4 flex items-center justify-center">
@@ -101,61 +108,99 @@ export function AnswerPhase() {
         </div>
 
         {/* Prompt */}
-        <div className="mb-8 p-6 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-xl border border-purple-400/30">
-          <h2 className="text-xl font-semibold text-white mb-4">Your Prompt:</h2>
-          <p className="text-2xl text-white leading-relaxed">"{prompt.text}"</p>
-          {prompt.role === 'liar' && (
-            <div className="mt-4 p-3 bg-red-500/20 border border-red-400/30 rounded-lg">
-              <p className="text-red-200 text-sm">
-                🎭 You are the Liar! Answer as if you received the true prompt, but be convincing!
-              </p>
+        {isPromptCreator ? (
+          <div className="mb-8 space-y-4">
+            {/* True Prompt */}
+            <div className="p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl border border-green-400/30">
+              <h2 className="text-xl font-semibold text-white mb-4">True Prompt (What everyone answers):</h2>
+              <p className="text-2xl text-white leading-relaxed">"{currentRound?.customPromptTextTrue}"</p>
             </div>
-          )}
-        </div>
+            
+            {/* Decoy Prompt */}
+            <div className="p-6 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-xl border border-red-400/30">
+              <h2 className="text-xl font-semibold text-white mb-4">Decoy Prompt (What the liar answers):</h2>
+              <p className="text-2xl text-white leading-relaxed">"{currentRound?.customPromptTextDecoy}"</p>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-8 p-6 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-xl border border-purple-400/30">
+            <h2 className="text-xl font-semibold text-white mb-4">Your Prompt:</h2>
+            <p className="text-2xl text-white leading-relaxed">"{prompt.text}"</p>
+            {prompt.role === 'liar' && (
+              <div className="mt-4 p-3 bg-red-500/20 border border-red-400/30 rounded-lg">
+                <p className="text-red-200 text-sm">
+                  🎭 You are the Liar! Answer as if you received the true prompt, but be convincing!
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Answer Input */}
-        <div className="mb-8">
-          <label htmlFor="answer" className="block text-lg font-medium text-white mb-3">
-            Your Answer:
-          </label>
-          <textarea
-            id="answer"
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            placeholder="Type your answer here..."
-            className="w-full h-32 px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none"
-            maxLength={200}
-            disabled={hasSubmitted}
-          />
-          <div className="text-right text-sm text-blue-200 mt-1">
-            {answer.length}/200 characters
-          </div>
-        </div>
-
-        {/* Submit Button */}
-        {!hasSubmitted ? (
-          <button
-            onClick={handleSubmit}
-            disabled={!answer.trim() || isSubmitting}
-            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-500 disabled:to-gray-600 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit Answer'}
-          </button>
-        ) : (
-          <div className="text-center">
-            <div className="bg-green-500/20 border border-green-400/30 rounded-lg p-4 mb-4">
-              <p className="text-green-200 font-medium">Answer submitted!</p>
-              <p className="text-green-300 text-sm mt-1">Waiting for other players...</p>
+        {isPromptCreator ? (
+          <div className="text-center py-8">
+            <div className="bg-purple-500/20 border border-purple-400/30 rounded-lg p-6 mb-4">
+              <h3 className="text-purple-200 font-semibold text-lg mb-2">You Created This Prompt</h3>
+              <p className="text-purple-300 text-sm">
+                Since you created the prompt for this round, you cannot participate in answering or voting. 
+                Watch as other players respond to your prompt!
+              </p>
             </div>
             {isHost && (
               <button
                 onClick={handleNextPhase}
                 className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
               >
-                All Submitted? Continue to Reveal
+                Continue to Reveal Phase
               </button>
             )}
           </div>
+        ) : (
+          <>
+            <div className="mb-8">
+              <label htmlFor="answer" className="block text-lg font-medium text-white mb-3">
+                Your Answer:
+              </label>
+              <textarea
+                id="answer"
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                placeholder="Type your answer here..."
+                className="w-full h-32 px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none"
+                maxLength={200}
+                disabled={hasSubmitted}
+              />
+              <div className="text-right text-sm text-blue-200 mt-1">
+                {answer.length}/200 characters
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            {!hasSubmitted ? (
+              <button
+                onClick={handleSubmit}
+                disabled={!answer.trim() || isSubmitting}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-500 disabled:to-gray-600 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Answer'}
+              </button>
+            ) : (
+              <div className="text-center">
+                <div className="bg-green-500/20 border border-green-400/30 rounded-lg p-4 mb-4">
+                  <p className="text-green-200 font-medium">Answer submitted!</p>
+                  <p className="text-green-300 text-sm mt-1">Waiting for other players...</p>
+                </div>
+                {isHost && (
+                  <button
+                    onClick={handleNextPhase}
+                    className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
+                  >
+                    All Submitted? Continue to Reveal
+                  </button>
+                )}
+              </div>
+            )}
+          </>
         )}
 
         {/* Players - Only visible to host */}
@@ -167,14 +212,13 @@ export function AnswerPhase() {
 
         {/* Progress */}
         <div className="mt-6 text-center">
-          <p className="text-blue-200 text-sm">
-            {submittedCount} of {totalPlayers} players have submitted
-          </p>
-          <div className="w-full bg-white/20 rounded-full h-2 mt-2">
-            <div 
-              className="bg-gradient-to-r from-green-400 to-emerald-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(submittedCount / totalPlayers) * 100}%` }}
-            ></div>
+          <div className="bg-white/5 rounded-lg p-3 border border-white/10 inline-block">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+              <span className="text-white/70 text-sm">
+                <span className="font-medium text-white">{submittedCount}</span> of <span className="font-medium text-white">{totalPlayers}</span> players have answered
+              </span>
+            </div>
           </div>
         </div>
       </div>

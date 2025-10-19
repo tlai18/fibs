@@ -11,6 +11,7 @@ import { navigateToHome } from '../utils/navigation';
 export function Lobby() {
   const { socket, gameState, player, isHost } = useGame();
   const [isStarting, setIsStarting] = useState(false);
+  const [gameMode, setGameMode] = useState<'classic' | 'custom'>('classic');
 
   // Listen for party:left response from server
   useEffect(() => {
@@ -47,7 +48,7 @@ export function Lobby() {
     if (!isHost) return;
     
     setIsStarting(true);
-    socket.emit('game:start', { partyCode: gameState.code });
+    socket.emit('game:start', { partyCode: gameState.code, gameMode });
     
     // Set a timeout to reset the loading state if no response
     const timeout = setTimeout(() => {
@@ -157,6 +158,35 @@ export function Lobby() {
         <div className="mt-8">
           {isHost ? (
             <div className="text-center">
+              {/* Game Mode Selection */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Choose Game Mode</h3>
+                <div className="flex gap-4 justify-center">
+                  <button
+                    onClick={() => setGameMode('classic')}
+                    className={`px-6 py-3 rounded-xl transition-all duration-200 border-2 ${
+                      gameMode === 'classic'
+                        ? 'bg-gradient-to-r from-blue-500/30 to-indigo-500/30 border-blue-400/50 text-blue-200'
+                        : 'bg-gradient-to-r from-gray-500/20 to-gray-600/20 border-gray-400/30 text-gray-300 hover:border-gray-400/50'
+                    }`}
+                  >
+                    <div className="font-semibold text-lg">Classic Mode</div>
+                    <div className="text-sm opacity-80">Random prompts, everyone plays</div>
+                  </button>
+                  <button
+                    onClick={() => setGameMode('custom')}
+                    className={`px-6 py-3 rounded-xl transition-all duration-200 border-2 ${
+                      gameMode === 'custom'
+                        ? 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 border-purple-400/50 text-purple-200'
+                        : 'bg-gradient-to-r from-gray-500/20 to-gray-600/20 border-gray-400/30 text-gray-300 hover:border-gray-400/50'
+                    }`}
+                  >
+                    <div className="font-semibold text-lg">Custom Mode</div>
+                    <div className="text-sm opacity-80">Players take turns creating prompts</div>
+                  </button>
+                </div>
+              </div>
+              
               <button
                 onClick={handleStartGame}
                 disabled={gameState.players.filter((p: any) => p.id !== 'NO_LIAR').length < 2 || isStarting}

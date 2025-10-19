@@ -13,6 +13,7 @@ model Party {
   code          String   @unique
   hostId        String?
   status        String   @default("lobby")
+  gameMode      String   @default("classic") // "classic" or "custom"
   usedPromptIds Int[]    @default([])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -37,6 +38,7 @@ model Player {
   party        Party        @relation(fields: [partyId], references: [id], onDelete: Cascade)
   responses    Response[]
   roundsAsLiar Round[]      @relation("LiarRound")
+  roundsAsPromptCreator Round[] @relation("PromptCreatorRound")
   votesAgainst Vote[]       @relation("AccusedVote")
   votesCast    Vote[]       @relation("VoterVote")
 
@@ -44,23 +46,28 @@ model Player {
 }
 
 model Round {
-  id           String        @id @default(cuid())
-  partyId      String
-  number       Int
-  liarPlayerId String?
-  status       String        @default("lobby")
-  stealth      Boolean       @default(false)
-  startedAt    DateTime      @default(now())
-  endedAt      DateTime?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  assignments  Assignment[]
-  responses    Response[]
-  prompt       RoundPrompt?
-  summary      RoundSummary?
-  liar         Player?       @relation("LiarRound", fields: [liarPlayerId], references: [id])
-  party        Party         @relation(fields: [partyId], references: [id], onDelete: Cascade)
-  votes        Vote[]
+  id                    String        @id @default(cuid())
+  partyId               String
+  number                Int
+  liarPlayerId          String?
+  promptCreatorId       String?       // Who created the custom prompt (custom mode only)
+  customPromptTextTrue  String?       // Custom prompt text (custom mode only)
+  customPromptTextDecoy String?       // Custom decoy text (custom mode only)
+  isCustomPrompt        Boolean       @default(false) // true if custom, false if from database
+  status                String        @default("lobby")
+  stealth               Boolean       @default(false)
+  startedAt             DateTime      @default(now())
+  endedAt               DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  assignments           Assignment[]
+  responses             Response[]
+  prompt                RoundPrompt?
+  summary               RoundSummary?
+  liar                  Player?       @relation("LiarRound", fields: [liarPlayerId], references: [id])
+  promptCreator         Player?       @relation("PromptCreatorRound", fields: [promptCreatorId], references: [id])
+  party                 Party         @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  votes                 Vote[]
 
   @@unique([partyId, number])
   @@map("rounds")

@@ -53,11 +53,21 @@ export class PromptService {
       throw new Error('Assignment not found');
     }
 
-    if (!assignment.round.prompt) {
-      throw new Error('Round prompt not found');
-    }
+    let actualPrompt: any;
 
-    const actualPrompt = assignment.round.prompt.prompt;
+    if (assignment.round.isCustomPrompt) {
+      // Custom prompt - use the round's custom prompt data
+      actualPrompt = {
+        textTrue: assignment.round.customPromptTextTrue,
+        textDecoy: assignment.round.customPromptTextDecoy
+      };
+    } else {
+      // Database prompt
+      if (!assignment.round.prompt) {
+        throw new Error('Round prompt not found');
+      }
+      actualPrompt = assignment.round.prompt.prompt;
+    }
 
     // During the answer phase, the liar doesn't know they're the liar
     // They get the decoy prompt text but think they're a truth-teller
@@ -97,14 +107,29 @@ export class PromptService {
       }
     });
 
-    if (!round || !round.prompt || !round.prompt.prompt) {
-      throw new Error('Round or prompt not found');
+    if (!round) {
+      throw new Error('Round not found');
     }
 
-    return {
-      textTrue: round.prompt.prompt.textTrue,
-      textDecoy: round.prompt.prompt.textDecoy
-    };
+    if (round.isCustomPrompt) {
+      // Custom prompt
+      if (!round.customPromptTextTrue || !round.customPromptTextDecoy) {
+        throw new Error('Custom prompt data not found');
+      }
+      return {
+        textTrue: round.customPromptTextTrue,
+        textDecoy: round.customPromptTextDecoy
+      };
+    } else {
+      // Database prompt
+      if (!round.prompt || !round.prompt.prompt) {
+        throw new Error('Database prompt not found');
+      }
+      return {
+        textTrue: round.prompt.prompt.textTrue,
+        textDecoy: round.prompt.prompt.textDecoy
+      };
+    }
   }
 
   async createInitialPrompts() {

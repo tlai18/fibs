@@ -26,9 +26,6 @@ export function RevealPhase() {
   const handleVote = (playerId: string) => {
     if (isSubmittingVote) return; // Prevent double-tap
     
-    // Don't do anything if clicking the same player again
-    if (selectedPlayer === playerId) return;
-    
     setIsSubmittingVote(true);
     setSelectedPlayer(playerId);
     socket.emit('vote:submit', { 
@@ -130,18 +127,22 @@ export function RevealPhase() {
     return () => clearTimeout(timer);
   }, [responses.length]);
 
-  // Voting functionality
+  // Voting functionality - only run when round changes
   useEffect(() => {
     const currentRound = gameState.rounds?.[0];
-    if (!currentRound) return;
+    if (!currentRound || !player) return;
 
     // Check if player has already voted
     const existingVote = currentRound.votes?.find((v: any) => v.voterId === player.id);
     if (existingVote) {
       setSelectedPlayer(existingVote.accusedPlayerId);
       setIsSubmittingVote(false); // Player has already voted, not submitting
+    } else {
+      // Reset selection if no existing vote
+      setSelectedPlayer(null);
+      setIsSubmittingVote(false);
     }
-  }, [gameState, player]);
+  }, [gameState.rounds?.[0]?.id, player?.id]); // Only depend on round ID and player ID
 
 
   return (
@@ -163,11 +164,15 @@ export function RevealPhase() {
               <p className="text-white text-lg">Preparing the reveal...</p>
             </div>
           )}
-          {showAnswers && (
+          {showAnswers && currentRound?.promptCreatorId === player.id && currentRound?.isCustomPrompt ? (
+            <p className="text-purple-200 text-lg">
+              You created the prompts for this round, so you'll observe as other players vote.
+            </p>
+          ) : showAnswers ? (
             <p className="text-white text-lg">
               Read everyone's answers and vote for who you think is the Liar.
             </p>
-          )}
+          ) : null}
         </div>
 
 
@@ -186,27 +191,136 @@ export function RevealPhase() {
           </div>
         )}
 
+        {/* Custom Prompts Display for Prompt Creator */}
+        {currentRound?.promptCreatorId === player.id && currentRound?.isCustomPrompt && showAnswers && (
+          <div className="mb-8 space-y-4">
+            <div className="text-center mb-4">
+              <h3 className="text-xl font-semibold text-purple-300 mb-2">Your Created Prompts</h3>
+            </div>
+            
+            {/* True Prompt */}
+            <div className="mb-4 animate-fade-in">
+              <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl p-6 border-2 border-green-400/50">
+                <div className="text-center mb-4">
+                  <h4 className="text-lg font-bold text-green-300 mb-2">True Prompt</h4>
+                  <div className="w-12 h-1 bg-green-400 mx-auto rounded-full"></div>
+                </div>
+                <p className="text-white text-lg leading-relaxed text-center">
+                  "{currentRound?.customPromptTextTrue}"
+                </p>
+              </div>
+            </div>
+            
+            {/* Decoy Prompt */}
+            <div className="mb-4 animate-fade-in">
+              <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-xl p-6 border-2 border-red-400/50">
+                <div className="text-center mb-4">
+                  <h4 className="text-lg font-bold text-red-300 mb-2">Decoy Prompt</h4>
+                  <div className="w-12 h-1 bg-red-400 mx-auto rounded-full"></div>
+                </div>
+                <p className="text-white text-lg leading-relaxed text-center">
+                  "{currentRound?.customPromptTextDecoy}"
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Answers Display for Prompt Creator */}
+        {currentRound?.promptCreatorId === player.id && showAnswers && (
+          <div className="mb-8">
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold text-white mb-2">Player Answers</h3>
+              <p className="text-purple-200 text-sm">Watch how players responded to your prompts</p>
+              
+              {/* Progress Counter for Prompt Creator */}
+              <div className="bg-white/5 rounded-lg p-3 border border-white/10 inline-block mt-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-purple-400 rounded-full"></div>
+                  <span className="text-white/70 text-sm">
+                    <span className="font-medium text-white">{votes.length}</span> of <span className="font-medium text-white">{gameState.players.filter((p: any) => p.id !== 'NO_LIAR' && p.id !== currentRound.promptCreatorId).length}</span> players have voted
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-8">
+              {gameState.players
+                .filter((p: any) => p.id !== 'NO_LIAR' && p.id !== currentRound.promptCreatorId) // Exclude prompt creator
+                .map((p: any, index: number) => {
+                const playerResponse = responses.find((r: any) => r.playerId === p.id);
+                const isVisible = visibleAnswers.includes(index);
+                
+                return (
+                  <div
+                    key={p.id}
+                    className={`p-4 rounded-xl border-2 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border-purple-400/30 text-center transition-all duration-1000 ease-out ${
+                      isVisible
+                        ? 'opacity-100 scale-100 translate-y-0'
+                        : 'opacity-0 scale-95 translate-y-8'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-3">
+                      <AnimeAvatar type={p.avatar || 'cat'} size="lg" />
+                      <span className="font-semibold text-white text-center">
+                        {p.nickname}
+                      </span>
+                      
+                      {/* Show player's answer */}
+                      {playerResponse && (
+                        <div className="text-sm text-purple-200 text-center max-w-full">
+                          <div className="truncate" title={playerResponse.text}>
+                            "{playerResponse.text}"
+                          </div>
+                        </div>
+                      )}
+                      
+                      {!playerResponse && (
+                        <div className="text-xs text-gray-400 italic">
+                          No answer yet
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
           {/* Voting Section */}
           {showAnswers && (
             <div className="mb-8">
               <div className="text-center mb-6">
                 <h3 className="text-xl font-semibold text-white mb-2">Who is the Liar?</h3>
-                <p className="text-blue-200 mb-3">Click on a player to vote for them, or choose "No Liar" if you think everyone told the truth</p>
-                
-                {/* Voting Progress */}
-                <div className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-lg p-3 border border-blue-400/20 inline-block">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                    <span className="text-blue-200 text-sm">
-                      <span className="font-semibold text-white">{votes.length}</span> of <span className="font-semibold text-white">{gameState.players.filter((p: any) => p.id !== 'NO_LIAR').length}</span> players have voted
-                    </span>
+                {currentRound.promptCreatorId === player.id ? (
+                  <div className="bg-purple-500/20 border border-purple-400/30 rounded-lg p-4 mb-4">
+                    <p className="text-purple-200 text-sm">
+                      You created this prompt, so you cannot vote in this round. Watch as other players vote!
+                    </p>
                   </div>
-                </div>
+                ) : (
+                  <p className="text-blue-200 mb-3">Click on a player to vote for them, or choose "No Liar" if you think everyone told the truth</p>
+                )}
+                
+                {/* Voting Progress - Hidden for prompt creator */}
+                {currentRound.promptCreatorId !== player.id && (
+                  <div className="bg-white/5 rounded-lg p-3 border border-white/10 inline-block">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                      <span className="text-white/70 text-sm">
+                        <span className="font-medium text-white">{votes.length}</span> of <span className="font-medium text-white">{gameState.players.filter((p: any) => p.id !== 'NO_LIAR' && p.id !== currentRound.promptCreatorId).length}</span> players have voted
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             
-            {/* Players Grid for Voting */}
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-8">
+            {/* Players Grid for Voting - Hidden for prompt creator */}
+            {currentRound.promptCreatorId !== player.id && (
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-8">
               {gameState.players
+                .filter((p: any) => p.id !== 'NO_LIAR' && p.id !== currentRound.promptCreatorId) // Exclude prompt creator
                 .map((p: any, index: number) => {
                 const isSelected = selectedPlayer === p.id;
                 const voteCount = votes.filter((v: any) => v.accusedPlayerId === p.id).length;
@@ -262,33 +376,62 @@ export function RevealPhase() {
                   </button>
                 );
               })}
-            </div>
+              </div>
+            )}
 
             {/* No Liar Option */}
-            <div className="text-center">
-              <button
-                onClick={() => !isSubmittingVote && handleVote('NO_LIAR')}
-                disabled={isSubmittingVote}
-                className={`px-8 py-4 rounded-xl border-2 transition-all duration-200 ${
-                  isSubmittingVote
-                    ? 'bg-gradient-to-r from-gray-500/20 to-gray-600/20 border-gray-400/50 cursor-not-allowed opacity-75'
-                    : selectedPlayer === 'NO_LIAR'
-                    ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/50 scale-105'
-                    : 'bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border-blue-400/50 hover:border-blue-400/70 hover:bg-blue-500/30 hover:scale-105'
-                }`}
-              >
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+            {currentRound.promptCreatorId !== player.id && (
+              <div className="text-center">
+                <button
+                  onClick={() => !isSubmittingVote && handleVote('NO_LIAR')}
+                  disabled={isSubmittingVote}
+                  className={`px-6 py-4 rounded-xl border-2 transition-all duration-2000 ease-out transform text-center ${
+                    isSubmittingVote
+                      ? 'bg-gradient-to-r from-gray-500/20 to-gray-600/20 border-gray-400/50 cursor-not-allowed opacity-75'
+                      : selectedPlayer === 'NO_LIAR'
+                      ? 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 border-emerald-400/50 scale-105'
+                      : 'bg-white/10 border-white/20 hover:border-emerald-400/40 hover:bg-emerald-500/15 hover:scale-105'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-3">
+                    {/* Icon */}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
+                      selectedPlayer === 'NO_LIAR'
+                        ? 'bg-emerald-500'
+                        : 'bg-slate-500 group-hover:bg-emerald-500'
+                    }`}>
+                      <svg 
+                        className="w-4 h-4 text-white" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2.5} 
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
+                        />
+                      </svg>
+                    </div>
+                    
+                    {/* Text */}
+                    <div className="text-left">
+                      <div className={`font-semibold text-white transition-colors duration-200 ${
+                        selectedPlayer === 'NO_LIAR' ? 'text-emerald-100' : 'text-white'
+                      }`}>
+                        Everyone Told the Truth
+                      </div>
+                      <div className={`text-xs text-white/70 transition-colors duration-200 ${
+                        selectedPlayer === 'NO_LIAR' ? 'text-emerald-200' : 'text-white/70'
+                      }`}>
+                        No one is lying this round
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-white font-semibold text-lg">
-                    No Liar - Everyone Told the Truth
-                  </span>
-                </div>
-              </button>
-            </div>
+                </button>
+              </div>
+            )}
           </div>
         )}
 
