@@ -55,7 +55,7 @@ export function HowToPlay({ className = '' }: HowToPlayProps) {
                   <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">2</div>
                   <h5 className="font-semibold text-white">Answer Phase</h5>
                 </div>
-                <p className="text-purple-200 text-sm">Everyone writes an answer based on their prompt. <span className="text-yellow-300 font-medium">You don't know yet if you're the Liar!</span></p>
+                <p className="text-purple-200 text-sm">Everyone writes an answer based on their prompt. <span className="text-yellow-300 font-medium">You don&apos;t know yet if you&apos;re the Liar!</span></p>
               </div>
 
               {/* Step 3 */}
@@ -64,8 +64,8 @@ export function HowToPlay({ className = '' }: HowToPlayProps) {
                   <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm">3</div>
                   <h5 className="font-semibold text-white">Discussion & Vote</h5>
                 </div>
-                <p className="text-green-200 text-sm">Read all answers, <span className="text-green-300 font-medium">discuss with your group</span>, then vote for who you think is lying, or choose <span className="text-green-300 font-medium">"No Liar"</span> if everyone seems honest.</p>
-                <p className="text-green-200 text-xs mt-2"><span className="text-yellow-300 font-medium">💡 Tip:</span> There's a <span className="text-yellow-300 font-bold">10% chance</span> that there's actually no liar in the round!</p>
+                <p className="text-green-200 text-sm">Read all answers, <span className="text-green-300 font-medium">discuss with your group</span>, then vote for who you think is lying, or choose <span className="text-green-300 font-medium">&quot;No Liar&quot;</span> if everyone seems honest.</p>
+                <p className="text-green-200 text-xs mt-2"><span className="text-yellow-300 font-medium">💡 Tip:</span> There&apos;s a <span className="text-yellow-300 font-bold">10% chance</span> that there&apos;s actually no liar in the round!</p>
               </div>
 
               {/* Step 4 */}
