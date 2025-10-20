@@ -269,7 +269,7 @@ export function RevealPhase() {
                       {/* Show player's answer */}
                       {playerResponse && (
                         <div className="text-sm text-purple-200 text-center max-w-full">
-                          <div className="truncate" title={playerResponse.text}>
+                          <div className="break-words" title={playerResponse.text}>
                             "{playerResponse.text}"
                           </div>
                         </div>
@@ -359,7 +359,7 @@ export function RevealPhase() {
                       {/* Show player's answer */}
                       {playerResponse && (
                         <div className="text-xs text-blue-200 text-center max-w-full">
-                          <div className="truncate" title={playerResponse.text}>
+                          <div className="break-words" title={playerResponse.text}>
                             "{playerResponse.text}"
                           </div>
                         </div>
