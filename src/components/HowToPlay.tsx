@@ -33,148 +33,66 @@ export function HowToPlay({ className = '' }: HowToPlayProps) {
       
       {!isMinimized && (
         <div className="px-6 pb-6">
+          {/* Goal */}
+          <div className="text-center mb-6">
+            <p className="text-white text-sm">
+              Find the <span className="text-red-300 font-medium">liar</span>! One player lies, everyone else tells the truth.
+            </p>
+          </div>
+
           {/* Game Flow */}
-          <div className="space-y-4 mb-8">
-            <div className="text-center mb-4">
-              <h4 className="text-lg font-semibold text-indigo-300 mb-2">The Game Flow</h4>
-            </div>
-            
-            <div className="grid gap-4 md:grid-cols-2">
-              {/* Step 1 */}
-              <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-4 border border-blue-400/30">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">1</div>
-                  <h5 className="font-semibold text-white">Secret Assignment</h5>
-                </div>
-                <p className="text-blue-200 text-sm">One player becomes the <span className="text-red-300 font-medium">Liar</span> and gets a fake prompt. Everyone else gets the real prompt.</p>
+          <div className="mb-6">
+            <div className="grid gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xs">1</div>
+                <span className="text-white text-sm">One player gets fake prompt, others get real one</span>
               </div>
-
-              {/* Step 2 */}
-              <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-4 border border-purple-400/30">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">2</div>
-                  <h5 className="font-semibold text-white">Answer Phase</h5>
-                </div>
-                <p className="text-purple-200 text-sm">Everyone writes an answer based on their prompt. <span className="text-yellow-300 font-medium">You don&apos;t know yet if you&apos;re the Liar!</span></p>
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xs">2</div>
+                <span className="text-white text-sm">Everyone writes an answer (liar doesn't know yet)</span>
               </div>
-
-              {/* Step 3 */}
-              <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl p-4 border border-green-400/30">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm">3</div>
-                  <h5 className="font-semibold text-white">Discussion & Vote</h5>
-                </div>
-                <p className="text-green-200 text-sm">Read all answers, <span className="text-green-300 font-medium">discuss with your group</span>, then vote for who you think is lying, or choose <span className="text-green-300 font-medium">&quot;No Liar&quot;</span> if everyone seems honest.</p>
-                <p className="text-green-200 text-xs mt-2"><span className="text-yellow-300 font-medium">💡 Tip:</span> There&apos;s a <span className="text-yellow-300 font-bold">10% chance</span> that there&apos;s actually no liar in the round!</p>
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-xs">3</div>
+                <span className="text-white text-sm">Discuss and vote for the liar or "No Liar"</span>
               </div>
-
-              {/* Step 4 */}
-              <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-xl p-4 border border-orange-400/30">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">4</div>
-                  <h5 className="font-semibold text-white">Results</h5>
-                </div>
-                <p className="text-orange-200 text-sm">Points are awarded based on who got caught and how well the Liar performed.</p>
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xs">4</div>
+                <span className="text-white text-sm">Points awarded based on results</span>
               </div>
             </div>
           </div>
 
           {/* Game Modes */}
-          <div className="border-t border-indigo-400/30 pt-6 mb-8">
-            <div className="text-center mb-4">
-              <h4 className="text-lg font-semibold text-indigo-300 mb-2">Game Modes</h4>
-              <p className="text-indigo-200 text-sm">Choose your preferred style of play</p>
-            </div>
-            
-            <div className="grid gap-4 md:grid-cols-2">
-              {/* Classic Mode */}
-              <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-4 border border-blue-400/30">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
-                  <h5 className="font-semibold text-white">Classic Mode</h5>
-                </div>
-                <ul className="text-blue-200 text-sm space-y-1">
-                  <li>• Random prompts from the database</li>
-                  <li>• Everyone participates in every round</li>
-                  <li>• Traditional social deduction gameplay</li>
-                  <li>• Perfect for new players</li>
-                </ul>
+          <div className="border-t border-white/10 pt-4 mb-6">
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="text-center">
+                <h6 className="font-semibold text-blue-300 text-sm mb-1">Classic</h6>
+                <p className="text-blue-200 text-xs">Random prompts, everyone plays</p>
               </div>
-
-              {/* Custom Mode */}
-              <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-4 border border-purple-400/30">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </div>
-                  <h5 className="font-semibold text-white">Custom Mode</h5>
-                </div>
-                <ul className="text-purple-200 text-sm space-y-1">
-                  <li>• Players take turns creating prompts</li>
-                  <li>• Prompt creator sits out that round</li>
-                  <li>• More creative and personal gameplay</li>
-                  <li>• Great for experienced players</li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Custom Mode Details */}
-            <div className="mt-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg p-4 border border-purple-400/20">
-              <h6 className="font-semibold text-purple-300 text-sm mb-2">Custom Mode Rules:</h6>
-              <div className="text-purple-200 text-xs space-y-1">
-                <p>• <strong>Turn-based:</strong> Players create prompts in order (Round 1: Player 1, Round 2: Player 2, etc.)</p>
-                <p>• <strong>Creator Immunity:</strong> The prompt creator cannot vote or be voted as the liar</p>
-                <p>• <strong>Two Prompts:</strong> Create one true prompt and one decoy prompt for the liar</p>
-                <p>• <strong>Full Participation:</strong> Everyone else plays normally in that round</p>
+              <div className="text-center">
+                <h6 className="font-semibold text-purple-300 text-sm mb-1">Custom</h6>
+                <p className="text-purple-200 text-xs">Players create prompts, creator sits out</p>
               </div>
             </div>
           </div>
 
-          {/* Scoring System */}
-          <div className="border-t border-indigo-400/30 pt-6">
-            <div className="text-center mb-4">
-              <h4 className="text-lg font-semibold text-indigo-300 mb-2">Scoring System</h4>
-              <p className="text-indigo-200 text-sm">How to win points and outsmart your opponents</p>
+          {/* Scoring */}
+          <div className="border-t border-white/10 pt-4">
+            <div className="text-center mb-3">
+              <h6 className="font-semibold text-white text-sm">Scoring</h6>
             </div>
-            
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-lg p-3 border border-green-400/20 text-center">
-                <div className="flex justify-center mb-1">
-                  <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <h6 className="font-semibold text-green-300 text-sm mb-1">Group Win</h6>
-                <p className="text-green-200 text-xs">Truth-tellers catch the Liar</p>
-                <p className="text-white font-bold text-sm mt-1">+1 each</p>
+            <div className="grid gap-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-green-200">Group catches liar</span>
+                <span className="text-white font-medium">+1 each</span>
               </div>
-              
-              <div className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 rounded-lg p-3 border border-orange-400/20 text-center">
-                <div className="flex justify-center mb-1">
-                  <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h6 className="font-semibold text-orange-300 text-sm mb-1">Liar Escaped</h6>
-                <p className="text-orange-200 text-xs">Liar gets some votes but escapes</p>
-                <p className="text-white font-bold text-sm mt-1">Liar +2</p>
+              <div className="flex justify-between">
+                <span className="text-orange-200">Liar escapes</span>
+                <span className="text-white font-medium">Liar +2</span>
               </div>
-              
-              <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg p-3 border border-purple-400/20 text-center">
-                <div className="flex justify-center mb-1">
-                  <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                </div>
-                <h6 className="font-semibold text-purple-300 text-sm mb-1">Perfect Lie</h6>
-                <p className="text-purple-200 text-xs">Liar fools everyone completely</p>
-                <p className="text-white font-bold text-sm mt-1">Liar +3</p>
+              <div className="flex justify-between">
+                <span className="text-purple-200">Perfect lie</span>
+                <span className="text-white font-medium">Liar +3</span>
               </div>
             </div>
           </div>
