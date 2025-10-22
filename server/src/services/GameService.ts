@@ -698,7 +698,10 @@ export class GameService {
           where: { roundId: round.id, role: 'truth' }
         });
         truthPlayers.forEach(assignment => {
-          scoresDelta[assignment.playerId] = 1;
+          // In custom mode, don't give points to the prompt creator
+          if (!round.isCustomPrompt || assignment.playerId !== round.promptCreatorId) {
+            scoresDelta[assignment.playerId] = 1;
+          }
         });
         // Liar gets 0
       } else {
@@ -754,10 +757,13 @@ export class GameService {
       // No Liar round
       if (winner === 'NO_LIAR') {
         winType = 'group_win';
-        // Give +1 points to all players who voted "No Liar"
+        // Give +1 points to all players who voted "No Liar" (excluding prompt creator in custom mode)
         votes.forEach(vote => {
           if (vote.isNoLiarVote) {
-            scoresDelta[vote.voterId] = 1;
+            // In custom mode, don't give points to the prompt creator
+            if (!round.isCustomPrompt || vote.voterId !== round.promptCreatorId) {
+              scoresDelta[vote.voterId] = 1;
+            }
           }
         });
       } else {
