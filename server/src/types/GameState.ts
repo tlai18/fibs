@@ -143,6 +143,14 @@ export interface SocketEvents {
   'player:reconnected': Player;
   'game:returned-to-lobby': { message: string };
 
+  // Synchronized reveal events
+  'reveal:start-sequence': { partyCode: string; startTime: number };
+  'reveal:sequence-started': { startTime: number; responseCount: number };
+  'reveal:next-response': { partyCode: string; index: number; timestamp: number };
+  'reveal:response-shown': { index: number; timestamp: number };
+  'reveal:sequence-complete': { partyCode: string; timestamp: number };
+  'reveal:sequence-ended': { timestamp: number };
+
   // Error handling
   'error': { message: string };
 }

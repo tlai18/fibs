@@ -4,6 +4,7 @@ export const GAME_PHASES = {
   LOBBY: 'lobby',
   PROMPT_CREATION: 'prompt-creation',
   ANSWER: 'answer',
+  SEQUENTIAL_REVEAL: 'sequential-reveal',
   REVEAL: 'reveal',
   RESULTS: 'results'
 } as const;

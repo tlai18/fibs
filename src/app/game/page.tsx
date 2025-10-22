@@ -8,6 +8,7 @@ import { Lobby } from '@/components/Lobby';
 import { PromptCreationPhase } from '@/components/PromptCreationPhase';
 import { AnswerPhase } from '@/components/AnswerPhase';
 import { RevealPhase } from '@/components/RevealPhase';
+import { SequentialRevealPhase } from '@/components/SequentialRevealPhase';
 import { ResultsPhase } from '@/components/ResultsPhase';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ErrorScreen } from '@/components/ErrorScreen';
@@ -450,6 +451,7 @@ function GamePageContent() {
         {currentPhase === 'lobby' && <Lobby />}
         {currentPhase === 'prompt-creation' && <PromptCreationPhase />}
         {currentPhase === 'answer' && <AnswerPhase />}
+        {currentPhase === 'sequential-reveal' && <SequentialRevealPhase />}
         {currentPhase === 'reveal' && <RevealPhase />}
         {currentPhase === 'results' && <ResultsPhase />}
       </div>

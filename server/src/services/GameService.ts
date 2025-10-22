@@ -575,6 +575,58 @@ export class GameService {
       await this.calculateRoundResults(updatedRound);
     }
 
+    // If advancing to reveal phase, check if we're coming from sequential-reveal
+    if (phase === 'reveal') {
+      if (currentRound.status === 'sequential-reveal') {
+        // Transition from sequential-reveal to reveal (normal transition)
+        console.log(`Transitioning from sequential-reveal to reveal for party ${partyCode}`);
+        // Update to reveal phase
+        const updatedRound = await this.prisma.round.update({
+          where: { id: currentRound.id },
+          data: { status: 'reveal' },
+          include: {
+            assignments: { include: { player: true } },
+            responses: { include: { player: true } },
+            votes: { include: { voter: true, accused: true } },
+            prompt: true
+          }
+        });
+        
+        const updatedParty = await this.getPartyState(party.code);
+        return {
+          round: updatedRound,
+          party: updatedParty
+        };
+      } else {
+        // First time transitioning to reveal, go to sequential-reveal first
+        // Update to sequential-reveal phase instead
+        const sequentialRevealRound = await this.prisma.round.update({
+          where: { id: currentRound.id },
+          data: { status: 'sequential-reveal' }
+        });
+        
+        // Get the updated round with all includes
+        const updatedSequentialRound = await this.prisma.round.findUnique({
+          where: { id: currentRound.id },
+          include: {
+            assignments: { include: { player: true } },
+            responses: { include: { player: true } },
+            votes: { include: { voter: true, accused: true } },
+            prompt: true
+          }
+        });
+        
+        // Add flag to indicate that the reveal sequence should auto-start
+        (updatedSequentialRound as any).autoStartReveal = true;
+        
+        const updatedParty = await this.getPartyState(party.code);
+        return {
+          round: updatedSequentialRound,
+          party: updatedParty
+        };
+      }
+    }
+
     const updatedParty = await this.getPartyState(party.code);
 
     return {
@@ -1273,5 +1325,94 @@ export class GameService {
     return await this.prisma.player.findFirst({
       where: { socketId, isActive: true }
     });
+  }
+
+  // Synchronized reveal methods
+  async startSynchronizedReveal(partyCode: string, socketId: string) {
+    try {
+      // Verify the player is the host
+      const player = await this.getPlayerBySocketId(socketId);
+      if (!player || !player.isHost) {
+        throw new Error('Only the host can start the synchronized reveal');
+      }
+
+      // Get the current round and responses
+      const round = await this.prisma.round.findFirst({
+        where: {
+          party: { code: partyCode },
+          status: 'sequential-reveal'
+        },
+        include: {
+          responses: {
+            include: { player: true }
+          },
+          party: {
+            include: { players: true }
+          }
+        }
+      });
+
+      if (!round) {
+        throw new Error('No active sequential reveal round found');
+      }
+
+      // Get players with responses (excluding prompt creator and NO_LIAR)
+      const playersWithResponses = round.party.players.filter(p => 
+        p.id !== 'NO_LIAR' && 
+        p.id !== round.promptCreatorId && 
+        round.responses.find(r => r.playerId === p.id)
+      );
+
+      const startTime = Date.now() + 1000; // Start in 1 second
+      
+      return {
+        startTime,
+        responseCount: playersWithResponses.length,
+        round,
+        playersWithResponses
+      };
+    } catch (error) {
+      console.error('Error starting synchronized reveal:', error);
+      throw error;
+    }
+  }
+
+  async advanceRevealSequence(partyCode: string, index: number, socketId: string) {
+    try {
+      // Verify the player is the host
+      const player = await this.getPlayerBySocketId(socketId);
+      if (!player || !player.isHost) {
+        throw new Error('Only the host can advance the reveal sequence');
+      }
+
+      const timestamp = Date.now();
+      
+      return {
+        index,
+        timestamp
+      };
+    } catch (error) {
+      console.error('Error advancing reveal sequence:', error);
+      throw error;
+    }
+  }
+
+  async completeRevealSequence(partyCode: string, socketId: string) {
+    try {
+      // Verify the player is the host
+      const player = await this.getPlayerBySocketId(socketId);
+      if (!player || !player.isHost) {
+        throw new Error('Only the host can complete the reveal sequence');
+      }
+
+      const timestamp = Date.now();
+      
+      return {
+        timestamp
+      };
+    } catch (error) {
+      console.error('Error completing reveal sequence:', error);
+      throw error;
+    }
   }
 }

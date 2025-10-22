@@ -67,6 +67,12 @@ export function setupSocketHandlers(io: Server) {
         const result = await gameService.advancePhase(data.partyCode, data.phase, socket.id);
         io.to(data.partyCode).emit('phase:changed', result);
         io.to(data.partyCode).emit('party:state', result.party);
+        
+        // Auto-start synchronized reveal when transitioning to sequential-reveal phase
+        if (result.round && result.round.status === 'sequential-reveal' && (result.round as any).autoStartReveal) {
+          // Start immediately
+          autoStartRevealSequence(io, data.partyCode, result.round);
+        }
       } catch (error) {
         socket.emit('error', { message: 'Failed to advance phase' });
       }
@@ -285,6 +291,58 @@ export function setupSocketHandlers(io: Server) {
       }
     });
 
+    // Synchronized reveal events
+    socket.on('reveal:start-sequence', async (data: { partyCode: string }) => {
+      try {
+        console.log('Starting synchronized reveal for party:', data.partyCode);
+        const result = await gameService.startSynchronizedReveal(data.partyCode, socket.id);
+        
+        // Broadcast to all players in the party
+        io.to(data.partyCode).emit('reveal:sequence-started', {
+          startTime: result.startTime,
+          responseCount: result.responseCount
+        });
+        
+        // Start the automated sequence immediately
+        startAutomatedRevealSequence(io, data.partyCode, result.responseCount, socket.id);
+        
+      } catch (error) {
+        console.error('Error starting synchronized reveal:', error);
+        socket.emit('error', { message: 'Failed to start synchronized reveal: ' + (error as Error).message });
+      }
+    });
+
+    socket.on('reveal:next-response', async (data: { partyCode: string; index: number }) => {
+      try {
+        const result = await gameService.advanceRevealSequence(data.partyCode, data.index, socket.id);
+        
+        // Broadcast to all players in the party
+        io.to(data.partyCode).emit('reveal:response-shown', {
+          index: result.index,
+          timestamp: result.timestamp
+        });
+        
+      } catch (error) {
+        console.error('Error advancing reveal sequence:', error);
+        socket.emit('error', { message: 'Failed to advance reveal sequence: ' + (error as Error).message });
+      }
+    });
+
+    socket.on('reveal:sequence-complete', async (data: { partyCode: string }) => {
+      try {
+        const result = await gameService.completeRevealSequence(data.partyCode, socket.id);
+        
+        // Broadcast to all players in the party
+        io.to(data.partyCode).emit('reveal:sequence-ended', {
+          timestamp: result.timestamp
+        });
+        
+      } catch (error) {
+        console.error('Error completing reveal sequence:', error);
+        socket.emit('error', { message: 'Failed to complete reveal sequence: ' + (error as Error).message });
+      }
+    });
+
     // Disconnect handling
     socket.on('disconnect', async () => {
       try {
@@ -311,5 +369,53 @@ export function setupSocketHandlers(io: Server) {
         console.error('Error handling disconnect:', error);
       }
     });
+  });
+}
+
+// Auto-start reveal sequence when transitioning to reveal phase
+async function autoStartRevealSequence(io: any, partyCode: string, round: any) {
+  try {
+    // Get players with responses (excluding prompt creator and NO_LIAR)
+    const playersWithResponses = round.party.players.filter((p: any) => 
+      p.id !== 'NO_LIAR' && 
+      p.id !== round.promptCreatorId && 
+      round.responses.find((r: any) => r.playerId === p.id)
+    );
+    
+    const responseCount = playersWithResponses.length;
+    const startTime = Date.now();
+    
+    // Broadcast sequence started to all players
+    io.to(partyCode).emit('reveal:sequence-started', {
+      startTime,
+      responseCount
+    });
+    
+    // Start the automated sequence immediately
+    startAutomatedRevealSequence(io, partyCode, responseCount, null);
+    
+  } catch (error) {
+    console.error('Error auto-starting reveal sequence:', error);
+  }
+}
+
+// Automated reveal sequence function
+async function startAutomatedRevealSequence(io: any, partyCode: string, responseCount: number, hostSocketId?: string | null) {
+  for (let index = 0; index < responseCount; index++) {
+    // Wait 2 seconds for each response to display (faster transition)
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Emit the next response to all players
+    io.to(partyCode).emit('reveal:response-shown', {
+      index,
+      timestamp: Date.now()
+    });
+  }
+  
+  // Wait 2 seconds after the last response, then end the sequence
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  io.to(partyCode).emit('reveal:sequence-ended', {
+    timestamp: Date.now()
   });
 }
