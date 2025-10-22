@@ -426,10 +426,6 @@ export class GameService {
 
     const round = party.rounds[0];
 
-    // Check if the voter is the prompt creator (cannot vote in custom mode)
-    if (round.promptCreatorId && round.promptCreatorId === voter.id) {
-      throw new Error('Prompt creator cannot vote in their own round');
-    }
 
     // For "No Liar" votes, we'll use a special approach without creating a database player
     // We'll store the vote with isNoLiarVote = true and accusedPlayerId = null
@@ -645,7 +641,13 @@ export class GameService {
     const allPlayers = await this.prisma.player.findMany({
       where: { partyId: round.partyId, isActive: true }
     });
-    const N = allPlayers.length;
+    
+    // In custom mode, exclude the prompt creator from scoring calculations
+    const participatingPlayers = round.isCustomPrompt && round.promptCreatorId 
+      ? allPlayers.filter(p => p.id !== round.promptCreatorId)
+      : allPlayers;
+    
+    const N = participatingPlayers.length;
     const majorityThreshold = Math.floor(N / 2) + 1;
 
     // Count votes for each player (excluding NO_LIAR votes)
