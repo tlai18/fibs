@@ -645,7 +645,13 @@ export class GameService {
     const allPlayers = await this.prisma.player.findMany({
       where: { partyId: round.partyId, isActive: true }
     });
-    const N = allPlayers.length;
+    
+    // In custom mode, exclude the prompt creator from scoring calculations
+    const participatingPlayers = round.isCustomPrompt && round.promptCreatorId 
+      ? allPlayers.filter(p => p.id !== round.promptCreatorId)
+      : allPlayers;
+    
+    const N = participatingPlayers.length;
     const majorityThreshold = Math.floor(N / 2) + 1;
 
     // Count votes for each player (excluding NO_LIAR votes)
@@ -696,7 +702,10 @@ export class GameService {
           where: { roundId: round.id, role: 'truth' }
         });
         truthPlayers.forEach(assignment => {
-          scoresDelta[assignment.playerId] = 1;
+          // In custom mode, don't give points to the prompt creator
+          if (!round.isCustomPrompt || assignment.playerId !== round.promptCreatorId) {
+            scoresDelta[assignment.playerId] = 1;
+          }
         });
         // Liar gets 0
       } else {
@@ -752,10 +761,13 @@ export class GameService {
       // No Liar round
       if (winner === 'NO_LIAR') {
         winType = 'group_win';
-        // Give +1 points to all players who voted "No Liar"
+        // Give +1 points to all players who voted "No Liar" (excluding prompt creator in custom mode)
         votes.forEach(vote => {
           if (vote.isNoLiarVote) {
-            scoresDelta[vote.voterId] = 1;
+            // In custom mode, don't give points to the prompt creator
+            if (!round.isCustomPrompt || vote.voterId !== round.promptCreatorId) {
+              scoresDelta[vote.voterId] = 1;
+            }
           }
         });
       } else {
